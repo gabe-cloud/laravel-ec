@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class AdminAuthController extends Controller
 {
     public function showLoginForm(){
-        return Inertia::render('Admin/Auth/Login');
+        return Inertia::render('admin/auth/Login');
     }
 
     public function login(Request $request){
