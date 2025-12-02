@@ -5,7 +5,7 @@
             :before-close="handleClose">
 
 
-            <form @submit.prevent="AddProduct()">
+            <form @submit.prevent="editMode ? updateProduct():AddProduct()">
                 <div class="relative z-0 w-full mb-5 group">
                     <input v-model="productData.title" type="text" name="floating_title" id="floating_title"
                         class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
@@ -40,7 +40,8 @@
 
                 <div class="grid md:gap-6">
                     <div class="relative z-0 w-full mb-5 group">
-                        <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                        <label for="countries"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
                             a Category</label>
                         <select id="category" v-model="productData.category_id"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -62,15 +63,28 @@
 
                 <div class="grid md:gap-6">
                     <div class="relative z-0 w-full mb-5 group">
-                        <el-upload v-model:file-list="productImages"
-                            list-type="picture-card" multiple :auto-upload="false"
-                            :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange">
+                        <el-upload v-model:file-list="productImages" list-type="picture-card" multiple
+                            :auto-upload="false" :on-preview="handlePictureCardPreview" :on-remove="handleRemove"
+                            :on-change="handleFileChange">
                             <el-icon>
                                 <Plus />
                             </el-icon>
                         </el-upload>
                     </div>
                 </div>
+
+                <div class="flex flex-nowrap mb-8">
+                    <div v-for="(pimage, index) in productData.product_images" :key="pimage.id"
+                        class="relative w-32 h-32">
+                        <img class="w-24 h-22 rounded" :src="`/${pimage.image}`" alt="">
+                        <span
+                            class="absolute top-0 right-8 transform -translate-y-1/2 w-3.5 h-3.5 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full">
+                            <span @click="deleteImage(pimage, index)"
+                                class="text-white text-xs font-bold absolute top-1/2 lef-1/2 transform -translate-x-1/ -translate-y-1/2">x</span>
+                        </span>
+                    </div>
+                </div>
+
 
                 <button type="submit" @click="AddProduct"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
@@ -219,17 +233,27 @@
                                 <th scope="row"
                                     class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{
                                         product.title }}</th>
-                                <td class="px-4 py-3">{{ product.category }}</td>
-                                <td class="px-4 py-3">{{ product.brand_id }}</td>
+                                <td class="px-4 py-3">{{ product.category.name }}</td>
+                                <td class="px-4 py-3">{{ product.brand.name }}</td>
                                 <td class="px-4 py-3">{{ product.quantity }}</td>
                                 <td class="px-4 py-3">${{ product.price }}</td>
-                                <td class="px-4 py-3">{{ product.inStock }}</td>
-                                <td class="px-4 py-3">{{ product.published }}</td>
+                                <td class="px-4 py-3">
+                                    <span v-if="product.inStock == 0"
+                                        class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300">inStock</span>
+                                    <span v-else
+                                        class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-red-900 dark:text-red-300">out
+                                        of Stock</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <button v-if="product.published == 0" type="button"
+                                        class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Published</button>
+                                    <button v-else type="button"
+                                        class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">UnPublished</button>
+                                </td>
 
 
                                 <td class="px-4 py-3 flex items-center justify-end">
-                                    <button id="apple-imac-27-dropdown-button"
-                                        data-dropdown-toggle="apple-imac-27-dropdown"
+                                    <button :id="`${product.id}-button`" :data-dropdown-toggle="`${product.id}`"
                                         class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
                                         type="button">
                                         <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
@@ -238,21 +262,21 @@
                                                 d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                                         </svg>
                                     </button>
-                                    <div id="apple-imac-27-dropdown"
+                                    <div :id="`${product.id}`"
                                         class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
                                         <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                                            aria-labelledby="apple-imac-27-dropdown-button">
+                                            :aria-labelledby="`${product.id}-button`">
                                             <li>
                                                 <a href="#"
                                                     class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Show</a>
                                             </li>
                                             <li>
-                                                <button @click="openEditModal(product)"
-                                                    class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</button>
+                                                <a href="#" @click="openEditModal(product)"
+                                                    class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</a>
                                             </li>
                                         </ul>
                                         <div class="py-1">
-                                            <a href="#"
+                                            <a href="#" @click="deleteProduct(product, index)"
                                                 class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete</a>
                                         </div>
                                     </div>
@@ -329,7 +353,12 @@ import { show } from '@/routes/two-factor';
 import { Form, usePage, router } from '@inertiajs/vue3';
 import { id } from 'element-plus/es/locales.mjs';
 import { ref } from 'vue';
-const products = usePage().props.products;
+import { Plus } from '@element-plus/icons-vue'
+
+defineProps({
+    products: Array
+})
+
 const brands = usePage().props.brands;
 const categories = usePage().props.categories;
 
@@ -367,17 +396,17 @@ const productData = ref({
 // upload multiple images
 const dialogImageUrl = ref('');
 const productImages = ref([]);
-const handleFileChange = (file, fileList) =>{
-    productImages.value =(fileList)
+const handleFileChange = (file, fileList) => {
+    productImages.value = (fileList)
 }
 
 const handlePictureCardPreview = (file) => {
-  dialogImageUrl.value = file.url
-  dialogVisible.value = true
+    dialogImageUrl.value = file.url
+    dialogVisible.value = true
 }
 
 const handleRemove = (file, fileList) => {
-   productImages.value = fileList;
+    productImages.value = fileList;
 }
 
 const openAddModal = () => {
@@ -436,15 +465,110 @@ const resetFormData = () => {
         description: '',
     };
     productImages.value = [];
+    dialogImageUrl.value = '';
 }
 
 
 const openEditModal = (product) => {
-    console.log(product);
-
     editMode.value = true;
     isAddProduct.value = false;
     dialogVisible.value = true;
+
+    productData.value.id = product.id;
+    productData.value.title = product.title;
+    productData.value.price = product.price;
+    productData.value.quantity = product.quantity;
+    productData.value.description = product.description;
+    productData.value.brand_id = product.brand_id;
+    productData.value.category_id = product.category_id;
+    productData.value.product_images = product.product_images;
+}
+
+const deleteImage = async (pimage, index) => {
+    try {
+        await router.delete('/admin/products/image/' + pimage.id, {
+            onSuccess: page => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    title: page.props.flash.success
+                })
+                productData.value.product_images.splice(index, 1);
+            },
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+const updateProduct = async () => {
+    const formData = new FormData();
+    const data = productData.value;
+
+    for (const key in data) {
+        if (Array.isArray(data[key])) {
+            continue;
+        }
+        formData.append(key, data[key]);
+    }
+    formData.append('_method', 'PUT');
+
+     for (const image of productImages.value) {
+        formData.append('product_images[]', image.raw);
+    }
+
+    try{
+        await router.post('/admin/products/update/' + productData.value.id, formData, {
+            onSuccess: page => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    title: page.props.flash.success
+                })
+                dialogVisible.value = false;
+                resetFormData();
+            },
+        });
+    }catch(err){
+        console.log(err);
+    }
+}
+
+const deleteProduct = (product, index) => {
+    Swal.fire({
+        title: 'Are you Sure',
+        text: "This actions cannot undo!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        cancelButtonText: 'no',
+        confirmButtonText: 'yes, delete!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            try {
+                router.delete('/admin/products/destroy/' + product.id, {
+                    onSuccess: (page) => {
+                        this.delete(product, index);
+                        Swal.fire({
+                            toast: true,
+                            icon: "success",
+                            position: "top-end",
+                            showConfirmButton: false,
+                            title: page.props.flash.success
+                        });
+                    }
+                })
+            } catch (err) {
+                console.log(err)
+            }
+        }
+    })
+
 }
 
 </script>
