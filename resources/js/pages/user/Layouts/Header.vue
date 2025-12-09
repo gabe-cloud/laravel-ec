@@ -19,7 +19,7 @@
                         <span class="sr-only">Notifications</span>
                         <div
                             class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -end-2 dark:border-gray-900">
-                            20</div>
+                            {{ cart.data.count }}</div>
                     </button>
                 </div>
 
@@ -41,10 +41,10 @@
                 <div v-else>
                     <Link :href="login()" type="button"
                         class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
-                    Login</Link>
+                        Login</Link>
                     <Link :href="register()" v-if="canRegister" type="button"
                         class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
-                    Register</Link>
+                        Register</Link>
                 </div>
 
 
@@ -120,10 +120,11 @@
 
 import { Link, usePage } from '@inertiajs/vue3';
 import { dashboard, login, register } from '@/routes';
+import { computed } from 'vue';
+
 
 const canLogin = usePage().props.canLogin;
 const canRegister = usePage().props.canRegister;
 const auth = usePage().props.auth;
-
-
+const cart = computed(() => usePage().props.cart);
 </script>
