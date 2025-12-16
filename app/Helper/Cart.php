@@ -11,10 +11,10 @@ class Cart
 {
     public static function getCount()
     {
-        if ($user = auth()->user()) {
-            return CartItem::whereUserId($user->id)->sum('quantity');
+         if ($user = auth()->user()) {
+            return CartItem::whereUserId($user->id)->count(); //sum('quantity')
         } else {
-            return array_reduce(self::getCookieCartItems(), fn($carry, $item) => $carry + $item['quantity'], 0);
+            return array_reduce(self::getCookieCartItems(), fn ($carry) => $carry + 1, 0);
         }
     }
 
