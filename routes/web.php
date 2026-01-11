@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\User\CartController;
+use App\Http\Controllers\User\ProductListController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,6 +19,13 @@ Route::controller(CartController::class)->prefix('cart')->group(function(){
     Route::patch('/update/{product}', 'update')->name('cart.update');
     Route::delete('/remove/{product}', 'delete')->name('cart.delete');
 });
+
+//routes for products list and filter
+Route::controller(ProductListController::class)->prefix('products')->group(function(){
+    Route::get('', 'index')->name('products.index');
+});
+
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
