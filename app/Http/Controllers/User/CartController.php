@@ -18,11 +18,11 @@ class CartController extends Controller
         $user = $request->user();
         if ($user) {
             $cartItems = CartItem::where('user_id', $user->id)->get();
-            $userAdress = UserAddress::where('user_id', $user->id)->where('isMain', 1)->first();
+            $userAddress = UserAddress::where('user_id', $user->id)->where('isMain', 1)->first();
             if ($cartItems->count() > 0) {
                 return Inertia::render('user/CartList', [
                     'cartItems' => $cartItems,
-                    'userAdress' => $userAdress,
+                    'userAddress' => $userAddress,
                 ]);
             }
         } else {
